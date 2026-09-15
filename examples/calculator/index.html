@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <style>
+        body { font-family: sans-serif; padding: 16.dp; text-align: center; background: #f5f5f5; }
+        .display { font-size: 32px; background: #fff; padding: 16px; border-radius: 8px; margin-bottom: 16px; min-height: 40px; }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        button { padding: 16px; font-size: 20px; border: none; background: #007bff; color: white; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <h2>MistFox Calculator</h2>
+    <div id="display" class="display">0</div>
+    <div class="grid">
+        <button onclick="press('7')">7</button>
+        <button onclick="press('8')">8</button>
+        <button onclick="press('9')">9</button>
+        <button onclick="press('+')">+</button>
+        <button onclick="press('4')">4</button>
+        <button onclick="press('5')">5</button>
+        <button onclick="press('6')">6</button>
+        <button onclick="press('-')">-</button>
+        <button onclick="press('1')">1</button>
+        <button onclick="press('2')">2</button>
+        <button onclick="press('3')">3</button>
+        <button onclick="calc()">=</button>
+        <button onclick="clearVal()" style="grid-column: span 4; background: #dc3545;">Clear</button>
+    </div>
+    <script src="mistfox-sdk.js"></script>
+    <script>
+        let expr = '';
+        async function init() {
+            try {
+                let saved = await Mist.storage.get('last_calc');
+                if (saved && saved.value) {
+                    expr = saved.value;
+                    document.getElementById('display').innerText = expr;
+                }
+            } catch (e) {}
+        }
+        function press(val) {
+            expr += val;
+            document.getElementById('display').innerText = expr;
+            Mist.storage.set('last_calc', expr);
+        }
+        function calc() {
+            try {
+                expr = String(eval(expr));
+                document.getElementById('display').innerText = expr;
+                Mist.storage.set('last_calc', expr);
+            } catch(e) {
+                document.getElementById('display').innerText = 'Error';
+            }
+        }
+        function clearVal() {
+            expr = '';
+            document.getElementById('display').innerText = '0';
+            Mist.storage.clear();
+        }
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "id": "com.mistfox.camera",
+  "name": "Camera Demo",
+  "version": "1.0.0",
+  "entry": "index.html",
+  "permissions": ["camera", "media"]
+}

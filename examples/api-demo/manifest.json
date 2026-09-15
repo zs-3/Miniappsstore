@@ -1,0 +1,7 @@
+{
+  "id": "com.mistfox.apidemo",
+  "name": "API Demo",
+  "version": "1.0.0",
+  "entry": "index.html",
+  "permissions": ["storage", "vibrate", "clipboard.write", "clipboard.read", "notifications"]
+}

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>WebGL Demo</title></head>
+<body>
+    <h2>WebGL 3D Demo</h2>
+    <canvas id="gl" width="300" height="300"></canvas>
+    <script src="mistfox-sdk.js"></script>
+    <script>
+        let gl = document.getElementById("gl").getContext("webgl");
+        if (gl) {
+            gl.clearColor(0.2, 0.4, 0.8, 1.0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+        }
+    </script>
+</body>
+</html>

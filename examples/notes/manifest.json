@@ -1,0 +1,10 @@
+{
+  "id": "com.mistfox.notes",
+  "name": "Notes",
+  "version": "1.0.0",
+  "versionCode": 1,
+  "description": "MistFox Notes Mini-App",
+  "entry": "index.html",
+  "icon": "icon.png",
+  "permissions": ["storage", "files.write", "share"]
+}

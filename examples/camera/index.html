@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Camera Demo</title></head>
+<body>
+    <h2>MistFox Camera Demo</h2>
+    <button onclick="takePhoto()">Take Photo</button>
+    <pre id="out"></pre>
+    <script src="mistfox-sdk.js"></script>
+    <script>
+        async function takePhoto() {
+            let res = await Mist.camera.takePhoto();
+            document.getElementById("out").innerText = JSON.stringify(res, null, 2);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "id": "com.mistfox.canvasdemo",
+  "name": "Canvas Demo",
+  "version": "1.0.0",
+  "entry": "index.html",
+  "permissions": []
+}

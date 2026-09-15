@@ -1,0 +1,13 @@
+{
+  "name": "@mistfox/sdk",
+  "version": "1.0.0",
+  "description": "MistFox Mini Apps Platform JavaScript/TypeScript SDK",
+  "main": "dist/mistfox-sdk.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "node build.js"
+  },
+  "keywords": ["mistfox", "miniapp", "sdk"],
+  "author": "MistFox Team",
+  "license": "MIT"
+}

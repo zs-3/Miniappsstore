@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes</title>
+</head>
+<body>
+    <h2>MistFox Notes</h2>
+    <textarea id="note" style="width: 100%; height: 200px;"></textarea><br><br>
+    <button onclick="saveNote()">Save Note</button>
+    <button onclick="shareNote()">Share Note</button>
+    <script src="mistfox-sdk.js"></script>
+    <script>
+        async function loadNote() {
+            let res = await Mist.storage.get("my_note");
+            if (res.exists) document.getElementById("note").value = res.value;
+        }
+        async function saveNote() {
+            let text = document.getElementById("note").value;
+            await Mist.storage.set("my_note", text);
+            await Mist.ui.toast("Note saved!");
+        }
+        async function shareNote() {
+            let text = document.getElementById("note").value;
+            await Mist.share.text(text, "My Note");
+        }
+        loadNote();
+    </script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Demo</title>
+</head>
+<body>
+    <h2>Network Data Fetch Demo</h2>
+    <p>Fetches data via Mist.network.fetch(). Remote code execution is prohibited.</p>
+    <button onclick="fetchData()">Fetch Posts JSON</button>
+    <pre id="output" style="background:#eee; padding: 12px;"></pre>
+    <script src="mistfox-sdk.js"></script>
+    <script>
+        async function fetchData() {
+            document.getElementById("output").innerText = "Fetching...";
+            try {
+                let res = await Mist.network.fetch("https://jsonplaceholder.typicode.com/todos/1");
+                document.getElementById("output").innerText = JSON.stringify(JSON.parse(res.data), null, 2);
+            } catch(e) {
+                document.getElementById("output").innerText = "Error: " + JSON.stringify(e);
+            }
+        }
+    </script>
+</body>
+</html>

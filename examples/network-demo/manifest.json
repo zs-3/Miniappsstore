@@ -1,0 +1,10 @@
+{
+  "id": "com.mistfox.networkdemo",
+  "name": "Network Demo",
+  "version": "1.0.0",
+  "versionCode": 1,
+  "description": "MistFox Network Data Demo (NO Code Execution)",
+  "entry": "index.html",
+  "icon": "icon.png",
+  "permissions": ["network"]
+}

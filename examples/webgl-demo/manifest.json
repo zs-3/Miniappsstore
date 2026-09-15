@@ -1,0 +1,7 @@
+{
+  "id": "com.mistfox.webgldemo",
+  "name": "WebGL Demo",
+  "version": "1.0.0",
+  "entry": "index.html",
+  "permissions": []
+}

@@ -1,0 +1,7 @@
+{
+  "id": "com.mistfox.deviceinfo",
+  "name": "Device Info",
+  "version": "1.0.0",
+  "entry": "index.html",
+  "permissions": ["device.info"]
+}

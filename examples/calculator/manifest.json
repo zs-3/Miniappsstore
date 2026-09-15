@@ -1,0 +1,10 @@
+{
+  "id": "com.mistfox.calculator",
+  "name": "Calculator",
+  "version": "1.0.0",
+  "versionCode": 1,
+  "description": "MistFox Calculator Mini-App",
+  "entry": "index.html",
+  "icon": "icon.png",
+  "permissions": ["storage"]
+}
