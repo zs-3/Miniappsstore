@@ -15,24 +15,21 @@
                 args: args || {}
             });
 
-            if (global.MistFoxBridgeInterface && typeof global.MistFoxBridgeInterface.postMessage === 'function') {
-                global.MistFoxBridgeInterface.postMessage(payload);
+            if (global.MistFoxBridgePort && typeof global.MistFoxBridgePort.postMessage === 'function') {
+                global.MistFoxBridgePort.postMessage(payload);
             } else {
                 reject({
                     code: 'BRIDGE_UNAVAILABLE',
-                    message: 'MistFox Native Bridge interface not available in current context.'
+                    message: 'MistFox WebMessageListener bridge port not available in current context.'
                 });
             }
         });
     }
 
-    if (!global.MistFoxNativeBridge) {
-        global.MistFoxNativeBridge = {};
-    }
-
-    var handleResponse = function (responseJson) {
-        try {
-            var response = typeof responseJson === 'string' ? JSON.parse(responseJson) : responseJson;
+    if (global.MistFoxBridgePort && typeof global.MistFoxBridgePort.addEventListener === 'function') {
+        global.MistFoxBridgePort.addEventListener('message', function (event) {
+            var data = event.data;
+            var response = typeof data === 'string' ? JSON.parse(data) : data;
             var handler = pendingRequests[response.id];
             if (handler) {
                 delete pendingRequests[response.id];
@@ -42,12 +39,8 @@
                     handler.reject(response.error || { code: 'UNKNOWN_ERROR', message: 'API call failed' });
                 }
             }
-        } catch (err) {
-            console.error('MistFox SDK response parse error:', err);
-        }
-    };
-
-    global.MistFoxNativeBridge._onResponse = handleResponse;
+        });
+    }
 
     var Mist = {
         call: call,
@@ -93,7 +86,7 @@
         network: {
             fetch: function (url, options) {
                 options = options || {};
-                return call('network.fetch', { url: url, method: options.method || 'GET' });
+                return call('network.fetch', { url: url, method: options.method || 'GET', body: options.body });
             }
         },
         clipboard: {

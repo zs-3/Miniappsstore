@@ -17,12 +17,10 @@
 
             if (global.MistFoxBridgePort && typeof global.MistFoxBridgePort.postMessage === 'function') {
                 global.MistFoxBridgePort.postMessage(payload);
-            } else if (global.MistFoxBridgeInterface && typeof global.MistFoxBridgeInterface.postMessage === 'function') {
-                global.MistFoxBridgeInterface.postMessage(payload);
             } else {
                 reject({
                     code: 'BRIDGE_UNAVAILABLE',
-                    message: 'MistFox Native Bridge interface not available in current context.'
+                    message: 'MistFox WebMessageListener bridge port not available in current context.'
                 });
             }
         });
@@ -43,29 +41,6 @@
             }
         });
     }
-
-    if (!global.MistFoxNativeBridge) {
-        global.MistFoxNativeBridge = {};
-    }
-
-    var handleResponse = function (responseJson) {
-        try {
-            var response = typeof responseJson === 'string' ? JSON.parse(responseJson) : responseJson;
-            var handler = pendingRequests[response.id];
-            if (handler) {
-                delete pendingRequests[response.id];
-                if (response.success) {
-                    handler.resolve(response.result);
-                } else {
-                    handler.reject(response.error || { code: 'UNKNOWN_ERROR', message: 'API call failed' });
-                }
-            }
-        } catch (err) {
-            console.error('MistFox SDK response parse error:', err);
-        }
-    };
-
-    global.MistFoxNativeBridge._onResponse = handleResponse;
 
     var Mist = {
         call: call,

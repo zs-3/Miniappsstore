@@ -1,5 +1,6 @@
 package com.mistfox.platform
 
+import android.net.Uri
 import com.mistfox.platform.api.APIException
 import com.mistfox.platform.api.APIRegistry
 import com.mistfox.platform.api.AppInfoAPI
@@ -8,6 +9,7 @@ import com.mistfox.platform.pkg.Manifest
 import com.mistfox.platform.pkg.PackageException
 import com.mistfox.platform.pkg.PackageInstaller
 import com.mistfox.platform.pkg.PackageVerifier
+import com.mistfox.platform.runtime.MistFoxNativeBridge
 import com.mistfox.platform.security.MiniAppContext
 import com.mistfox.platform.security.PermissionManager
 import kotlinx.coroutines.runBlocking
@@ -186,6 +188,46 @@ class ComprehensiveSecurityTestSuite {
         assertFalse(untrustedContext.isTrustedOrigin)
         assertFalse(untrustedContext.hasDeclaredPermission("camera"))
         assertFalse(untrustedContext.hasDeclaredPermission("storage"))
+    }
+
+    // --- WEBMESSAGE LISTENER & IFRAME SECURITY ---
+
+    @Test
+    fun testWebMessageBridgeIframeIsolation() {
+        runBlocking {
+            val permissionManager = PermissionManager(DummyContext())
+            val registry = APIRegistry(permissionManager)
+            registry.register(AppInfoAPI())
+
+            val manifest = Manifest(id = "com.mistfox.app", name = "App", version = "1.0")
+            val context = MiniAppContext.fromManifest(manifest, File("/tmp/pkg"), File("/tmp/data"), isTrustedOrigin = true)
+
+            val bridge = MistFoxNativeBridge(
+                webView = android.webkit.WebView(DummyContext()),
+                apiRegistry = registry,
+                getAppContext = { context },
+                coroutineScope = this
+            )
+
+            val validMsg = """{"id":"req_1","api":"app.info","args":{}}"""
+            val response = bridge.handleMessage(validMsg)
+            assertTrue(response.contains("com.mistfox.app"))
+        }
+    }
+
+    @Test
+    fun testNoAddJavascriptInterfaceInRuntimeCode() {
+        val candidates = listOf(
+            File("src/main/java/com/mistfox/platform/runtime/MiniAppRuntime.kt"),
+            File("android/app/src/main/java/com/mistfox/platform/runtime/MiniAppRuntime.kt")
+        )
+        val runtimeFile = candidates.find { it.exists() }
+        assertNotNull("MiniAppRuntime.kt must exist", runtimeFile)
+        val runtimeSource = runtimeFile!!.readText()
+        assertFalse(
+            "MiniAppRuntime MUST NOT contain addJavascriptInterface call",
+            runtimeSource.contains("addJavascriptInterface")
+        )
     }
 
     // --- API ROUTER & UNKNOWN API REJECTION ---

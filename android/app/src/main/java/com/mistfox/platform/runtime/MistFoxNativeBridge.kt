@@ -37,7 +37,7 @@ class MistFoxNativeBridge(
     ) {
         val messageJson = message.data ?: return
         if (!isMainFrame || sourceOrigin.toString() != "https://app.mistfox.local") {
-            // Reject messages from iframes or external origins
+            // Strictly reject messages from iframes, nested frames, or untrusted origins
             return
         }
 
@@ -47,8 +47,7 @@ class MistFoxNativeBridge(
                 try {
                     replyProxy.postMessage(responseJson)
                 } catch (_: Exception) {
-                    val escapedJson = responseJson.replace("\\", "\\\\").replace("'", "\\'")
-                    webView.evaluateJavascript("window.MistFoxNativeBridge._onResponse('$escapedJson')", null)
+                    // Ignore reply errors if port closed
                 }
             }
         }

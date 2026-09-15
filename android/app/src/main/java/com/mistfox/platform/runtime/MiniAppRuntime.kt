@@ -100,6 +100,7 @@ class MiniAppRuntime(
             ): Boolean {
                 val url = request?.url?.toString() ?: return false
                 if (url.startsWith("https://app.mistfox.local/")) {
+                    appContext = MiniAppContext.fromManifest(manifest, packageDir, dataDir, isTrustedOrigin = true)
                     return false
                 }
                 appContext = MiniAppContext.untrusted(url)
@@ -123,8 +124,9 @@ class MiniAppRuntime(
                 setOf("https://app.mistfox.local"),
                 bridge
             )
+        } else {
+            throw IllegalStateException("WebMessageListener is required for MistFox security runtime.")
         }
-        webView.addJavascriptInterface(bridge, "MistFoxBridgeInterface")
     }
 
     private fun registerAllAPIs() {
@@ -185,7 +187,6 @@ class MiniAppRuntime(
         if (WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)) {
             WebViewCompat.removeWebMessageListener(webView, "MistFoxBridgePort")
         }
-        webView.removeJavascriptInterface("MistFoxBridgeInterface")
         webView.destroy()
     }
 }
