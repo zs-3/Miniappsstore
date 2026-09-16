@@ -17,7 +17,7 @@ class PermissionManager(private val context: Context) {
 
     private val PREFS_NAME = "mistfox_permissions_store"
 
-    fun isMistFoxPermissionGrantedByUser(appId: String, permissionKey: String): Boolean {
+    fun isNexaPermissionGrantedByUser(appId: String, permissionKey: String): Boolean {
         val prefs = context.getSharedPreferences("${PREFS_NAME}_$appId", Context.MODE_PRIVATE)
         val perm = MistFoxPermission.fromKey(permissionKey) ?: return false
         if (perm.protectionLevel == ProtectionLevel.SAFE) {
@@ -26,7 +26,7 @@ class PermissionManager(private val context: Context) {
         return prefs.getBoolean(permissionKey, false)
     }
 
-    fun setMistFoxPermissionUserGrant(appId: String, permissionKey: String, granted: Boolean) {
+    fun setNexaPermissionUserGrant(appId: String, permissionKey: String, granted: Boolean) {
         val prefs = context.getSharedPreferences("${PREFS_NAME}_$appId", Context.MODE_PRIVATE)
         prefs.edit().putBoolean(permissionKey, granted).apply()
     }
@@ -42,7 +42,8 @@ class PermissionManager(private val context: Context) {
 
     fun checkPermission(
         appContext: MiniAppContext,
-        requiredPermissionKey: String?
+        requiredPermissionKey: String?,
+        isBackground: Boolean = false
     ): Result {
         if (!appContext.isTrustedOrigin) {
             return Result.UNTRUSTED_ORIGIN
@@ -55,12 +56,13 @@ class PermissionManager(private val context: Context) {
         val permission = MistFoxPermission.fromKey(requiredPermissionKey)
             ?: return Result.API_UNAVAILABLE
 
-        if (!appContext.hasDeclaredPermission(requiredPermissionKey)) {
+        val declaredList = if (isBackground) appContext.backgroundPermissions else appContext.declaredPermissions
+        if (!declaredList.contains(requiredPermissionKey)) {
             return Result.PERMISSION_NOT_DECLARED
         }
 
         if (permission.protectionLevel != ProtectionLevel.SAFE) {
-            if (!isMistFoxPermissionGrantedByUser(appContext.packageId, requiredPermissionKey)) {
+            if (!isNexaPermissionGrantedByUser(appContext.packageId, requiredPermissionKey)) {
                 return Result.USER_DENIED
             }
         }

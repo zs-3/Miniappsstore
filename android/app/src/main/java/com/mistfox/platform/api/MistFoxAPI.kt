@@ -10,6 +10,7 @@ import kotlinx.serialization.json.put
 interface MistFoxAPI {
     val name: String
     val requiredPermission: String?
+    val isBackgroundSafe: Boolean get() = false
 
     suspend fun execute(
         context: MiniAppContext,
@@ -24,6 +25,7 @@ sealed class APIException(val code: String, message: String) : Exception(message
     class AndroidPermissionDenied(msg: String) : APIException("ANDROID_PERMISSION_DENIED", msg)
     class ApiNotFound(msg: String) : APIException("API_NOT_FOUND", msg)
     class ApiUnavailable(msg: String) : APIException("API_UNAVAILABLE", msg)
+    class ApiNotAllowedInBackground(msg: String) : APIException("API_NOT_ALLOWED_IN_BACKGROUND", msg)
     class SecurityBlocked(msg: String) : APIException("SECURITY_BLOCKED", msg)
     class InternalError(msg: String) : APIException("INTERNAL_ERROR", msg)
 }
@@ -43,12 +45,17 @@ class APIRegistry(private val permissionManager: PermissionManager) {
     suspend fun dispatch(
         appContext: MiniAppContext,
         apiName: String,
-        args: JsonObject
+        args: JsonObject,
+        isBackground: Boolean = false
     ): JsonElement {
         val api = apis[apiName]
             ?: throw APIException.ApiNotFound("API '$apiName' is not registered.")
 
-        val permResult = permissionManager.checkPermission(appContext, api.requiredPermission)
+        if (isBackground && !api.isBackgroundSafe) {
+            throw APIException.ApiNotAllowedInBackground("API '$apiName' is prohibited during background execution.")
+        }
+
+        val permResult = permissionManager.checkPermission(appContext, api.requiredPermission, isBackground = isBackground)
         when (permResult) {
             PermissionManager.Result.GRANTED -> { /* Proceed */ }
             PermissionManager.Result.UNTRUSTED_ORIGIN ->

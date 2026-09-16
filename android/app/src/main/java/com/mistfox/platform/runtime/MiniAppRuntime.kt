@@ -177,6 +177,9 @@ class MiniAppRuntime(
         apiRegistry.register(NotificationsSendAPI(context))
         apiRegistry.register(BluetoothIsAvailableAPI(context))
         apiRegistry.register(NfcIsAvailableAPI(context))
+
+        apiRegistry.register(BackgroundScheduleAPI(context))
+        apiRegistry.register(BackgroundCancelAPI(context))
     }
 
     fun launch() {

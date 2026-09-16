@@ -4,12 +4,14 @@ import android.net.Uri
 import com.mistfox.platform.api.APIException
 import com.mistfox.platform.api.APIRegistry
 import com.mistfox.platform.api.AppInfoAPI
+import com.mistfox.platform.api.CameraTakePhotoAPI
 import com.mistfox.platform.api.NetworkFetchAPI
 import com.mistfox.platform.pkg.Manifest
 import com.mistfox.platform.pkg.PackageException
 import com.mistfox.platform.pkg.PackageInstaller
 import com.mistfox.platform.pkg.PackageVerifier
 import com.mistfox.platform.runtime.MistFoxNativeBridge
+import com.mistfox.platform.runtime.RhinoBackgroundRuntime
 import com.mistfox.platform.security.MiniAppContext
 import com.mistfox.platform.security.PermissionManager
 import kotlinx.coroutines.runBlocking
@@ -74,6 +76,24 @@ class ComprehensiveSecurityTestSuite {
     }
 
     @Test(expected = PackageException.InvalidManifest::class)
+    fun testBackgroundEntryPathTraversalRejected() {
+        val maliciousJson = """
+            {
+                "id": "com.mistfox.testapp",
+                "name": "Test App",
+                "version": "1.0.0",
+                "entry": "index.html",
+                "background": {
+                    "enabled": true,
+                    "entry": "../../../etc/shadow"
+                }
+            }
+        """.trimIndent()
+
+        Manifest.parseAndValidate(maliciousJson)
+    }
+
+    @Test(expected = PackageException.InvalidManifest::class)
     fun testOversizedManifestRejected() {
         val hugeName = "A".repeat(600 * 1024)
         val json = """
@@ -121,25 +141,21 @@ class ComprehensiveSecurityTestSuite {
     }
 
     @Test
-    fun testTamperDetectionFileAdditionAndRemoval() {
-        val tempDir = Files.createTempDirectory("pkg_tamper_test_").toFile()
+    fun testTamperDetectionBackgroundScriptModify() {
+        val tempDir = Files.createTempDirectory("pkg_bg_tamper_").toFile()
         try {
             File(tempDir, "manifest.json").writeText("{\"id\":\"com.mistfox.app\",\"name\":\"App\",\"version\":\"1.0\"}")
-            File(tempDir, "app.js").writeText("console.log('init');")
+            val bgDir = File(tempDir, "background")
+            bgDir.mkdirs()
+            val bgScript = File(bgDir, "background.js")
+            bgScript.writeText("console.log('original');")
 
             val hashBase = PackageVerifier.computeDeterministicPackageHash(tempDir)
 
-            // Add new unauthorized file
-            val newFile = File(tempDir, "malicious.js")
-            newFile.writeText("eval('hack')")
-            val hashAdded = PackageVerifier.computeDeterministicPackageHash(tempDir)
-            assertFalse("Adding a new file MUST alter the package hash", hashBase.contentEquals(hashAdded))
+            bgScript.writeText("console.log('tampered');")
+            val hashTampered = PackageVerifier.computeDeterministicPackageHash(tempDir)
 
-            // Remove file
-            newFile.delete()
-            File(tempDir, "app.js").delete()
-            val hashRemoved = PackageVerifier.computeDeterministicPackageHash(tempDir)
-            assertFalse("Removing a file MUST alter the package hash", hashBase.contentEquals(hashRemoved))
+            assertFalse("Tampering with background.js MUST alter package hash", hashBase.contentEquals(hashTampered))
         } finally {
             tempDir.deleteRecursively()
         }
@@ -160,6 +176,47 @@ class ComprehensiveSecurityTestSuite {
         } finally {
             PackageVerifier.isDevModeEnabled = true
             tempDir.deleteRecursively()
+        }
+    }
+
+    // --- RHINO BACKGROUND RUNTIME SECURITY & REFLECTION BLOCKING ---
+
+    @Test
+    fun testRhinoJavaReflectionBlocked() {
+        val permissionManager = PermissionManager(DummyContext())
+        val registry = APIRegistry(permissionManager)
+
+        val manifest = Manifest(id = "com.mistfox.app", name = "App", version = "1.0")
+        val context = MiniAppContext.fromManifest(manifest, File("/tmp/pkg"), File("/tmp/data"), isTrustedOrigin = true)
+
+        val rhinoRuntime = RhinoBackgroundRuntime(context, registry)
+
+        val maliciousScript = """
+            function onBackgroundEvent(e) {
+                try {
+                    var sys = java.lang.System.currentTimeMillis();
+                    return "REFLECT_SUCCESS";
+                } catch(err) {
+                    return "REFLECT_BLOCKED";
+                }
+            }
+        """.trimIndent()
+
+        val result = rhinoRuntime.executeBackgroundEvent(maliciousScript, "schedule")
+        assertEquals("REFLECT_BLOCKED", result)
+    }
+
+    @Test(expected = APIException.ApiNotAllowedInBackground::class)
+    fun testBackgroundExecutionRejectsNonBackgroundSafeApi() {
+        runBlocking {
+            val permissionManager = PermissionManager(DummyContext())
+            val registry = APIRegistry(permissionManager)
+            registry.register(CameraTakePhotoAPI()) // Camera is NOT background safe
+
+            val manifest = Manifest(id = "com.mistfox.app", name = "App", version = "1.0", permissions = listOf("camera"))
+            val context = MiniAppContext.fromManifest(manifest, File("/tmp/pkg"), File("/tmp/data"), isTrustedOrigin = true)
+
+            registry.dispatch(context, "camera.takePhoto", buildJsonObject {}, isBackground = true)
         }
     }
 

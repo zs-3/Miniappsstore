@@ -25,6 +25,7 @@ import java.net.URL
 class DeviceInfoAPI(private val androidContext: Context) : MistFoxAPI {
     override val name: String = "device.info"
     override val requiredPermission: String = "device.info"
+    override val isBackgroundSafe: Boolean = false
 
     override suspend fun execute(context: MiniAppContext, args: JsonObject): JsonElement {
         val displayMetrics = androidContext.resources.displayMetrics
@@ -45,6 +46,7 @@ class DeviceInfoAPI(private val androidContext: Context) : MistFoxAPI {
 class NetworkFetchAPI : MistFoxAPI {
     override val name: String = "network.fetch"
     override val requiredPermission: String = "network"
+    override val isBackgroundSafe: Boolean = true
 
     companion object {
         const val MAX_RESPONSE_SIZE_BYTES = 10L * 1024 * 1024 // 10MB
@@ -265,6 +267,7 @@ class SmsOpenComposerAPI(private val androidContext: Context) : MistFoxAPI {
 class NotificationsSendAPI(private val androidContext: Context) : MistFoxAPI {
     override val name: String = "notifications.send"
     override val requiredPermission: String = "notifications"
+    override val isBackgroundSafe: Boolean = true
 
     override suspend fun execute(context: MiniAppContext, args: JsonObject): JsonElement {
         val title = args["title"]?.jsonPrimitive?.content ?: context.name

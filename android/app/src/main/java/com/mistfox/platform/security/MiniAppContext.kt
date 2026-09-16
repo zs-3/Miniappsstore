@@ -10,6 +10,7 @@ data class MiniAppContext(
     val packageDir: File,
     val dataDir: File,
     val declaredPermissions: Set<String>,
+    val backgroundPermissions: Set<String> = emptySet(),
     val runtimeVersion: String = "1.0.0",
     val isTrustedOrigin: Boolean = true
 ) {
@@ -32,6 +33,7 @@ data class MiniAppContext(
                 packageDir = packageDir,
                 dataDir = dataDir,
                 declaredPermissions = manifest.permissions.toSet(),
+                backgroundPermissions = manifest.background?.permissions?.toSet() ?: manifest.permissions.toSet(),
                 isTrustedOrigin = isTrustedOrigin
             )
         }
@@ -44,6 +46,7 @@ data class MiniAppContext(
                 packageDir = File("/dev/null"),
                 dataDir = File("/dev/null"),
                 declaredPermissions = emptySet(),
+                backgroundPermissions = emptySet(),
                 isTrustedOrigin = false
             )
         }

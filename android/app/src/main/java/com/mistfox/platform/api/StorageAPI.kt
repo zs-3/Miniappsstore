@@ -13,6 +13,7 @@ import kotlinx.serialization.json.put
 class StorageGetAPI(private val androidContext: Context) : MistFoxAPI {
     override val name: String = "storage.get"
     override val requiredPermission: String = "storage"
+    override val isBackgroundSafe: Boolean = true
 
     override suspend fun execute(context: MiniAppContext, args: JsonObject): JsonElement {
         val key = args["key"]?.jsonPrimitive?.content
@@ -36,6 +37,7 @@ class StorageGetAPI(private val androidContext: Context) : MistFoxAPI {
 class StorageSetAPI(private val androidContext: Context) : MistFoxAPI {
     override val name: String = "storage.set"
     override val requiredPermission: String = "storage"
+    override val isBackgroundSafe: Boolean = true
 
     override suspend fun execute(context: MiniAppContext, args: JsonObject): JsonElement {
         val key = args["key"]?.jsonPrimitive?.content
@@ -56,6 +58,7 @@ class StorageSetAPI(private val androidContext: Context) : MistFoxAPI {
 class StorageRemoveAPI(private val androidContext: Context) : MistFoxAPI {
     override val name: String = "storage.remove"
     override val requiredPermission: String = "storage"
+    override val isBackgroundSafe: Boolean = true
 
     override suspend fun execute(context: MiniAppContext, args: JsonObject): JsonElement {
         val key = args["key"]?.jsonPrimitive?.content
@@ -71,6 +74,7 @@ class StorageRemoveAPI(private val androidContext: Context) : MistFoxAPI {
 class StorageClearAPI(private val androidContext: Context) : MistFoxAPI {
     override val name: String = "storage.clear"
     override val requiredPermission: String = "storage"
+    override val isBackgroundSafe: Boolean = true
 
     override suspend fun execute(context: MiniAppContext, args: JsonObject): JsonElement {
         val prefs = androidContext.getSharedPreferences("mistfox_storage_${context.packageId}", Context.MODE_PRIVATE)
@@ -83,6 +87,7 @@ class StorageClearAPI(private val androidContext: Context) : MistFoxAPI {
 class StorageHasAPI(private val androidContext: Context) : MistFoxAPI {
     override val name: String = "storage.has"
     override val requiredPermission: String = "storage"
+    override val isBackgroundSafe: Boolean = true
 
     override suspend fun execute(context: MiniAppContext, args: JsonObject): JsonElement {
         val key = args["key"]?.jsonPrimitive?.content
@@ -98,6 +103,7 @@ class StorageHasAPI(private val androidContext: Context) : MistFoxAPI {
 class StorageKeysAPI(private val androidContext: Context) : MistFoxAPI {
     override val name: String = "storage.keys"
     override val requiredPermission: String = "storage"
+    override val isBackgroundSafe: Boolean = true
 
     override suspend fun execute(context: MiniAppContext, args: JsonObject): JsonElement {
         val prefs = androidContext.getSharedPreferences("mistfox_storage_${context.packageId}", Context.MODE_PRIVATE)

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Background Demo</title>
+</head>
+<body>
+    <h2>MistFox Background Runtime Demo</h2>
+    <p>Schedule a background task executed by Rhino engine via WorkManager.</p>
+    <button onclick="scheduleTask()">Schedule Background Task (5s Delay)</button>
+    <button onclick="checkResult()">Check Last Background Run</button>
+    <pre id="output" style="background: #eee; padding: 12px; margin-top: 16px;"></pre>
+    <script src="mistfox-sdk.js"></script>
+    <script>
+        async function scheduleTask() {
+            try {
+                let res = await Mist.background.schedule("demo-task", 5000);
+                document.getElementById("output").innerText = "Scheduled task: " + JSON.stringify(res);
+            } catch(e) {
+                document.getElementById("output").innerText = "Error: " + JSON.stringify(e);
+            }
+        }
+        async function checkResult() {
+            try {
+                let res = await Mist.storage.get("lastBackgroundRun");
+                if (res.exists) {
+                    document.getElementById("output").innerText = "Last Background Run Time: " + res.value;
+                } else {
+                    document.getElementById("output").innerText = "No background run recorded yet.";
+                }
+            } catch(e) {
+                document.getElementById("output").innerText = "Error: " + JSON.stringify(e);
+            }
+        }
+    </script>
+</body>
+</html>

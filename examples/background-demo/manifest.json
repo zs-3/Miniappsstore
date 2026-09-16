@@ -1,0 +1,16 @@
+{
+  "id": "com.mistfox.backgrounddemo",
+  "name": "Background Demo",
+  "version": "1.0.0",
+  "versionCode": 1,
+  "description": "MistFox Background Task Execution Demo",
+  "entry": "index.html",
+  "icon": "icon.png",
+  "permissions": ["storage", "notifications", "background"],
+  "background": {
+    "enabled": true,
+    "entry": "background/background.js",
+    "events": ["schedule"],
+    "permissions": ["storage", "notifications"]
+  }
+}

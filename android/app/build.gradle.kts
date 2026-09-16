@@ -70,6 +70,8 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.biometric)
 
+    implementation("org.mozilla:rhino:1.7.15")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.ui.tooling)

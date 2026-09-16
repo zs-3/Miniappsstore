@@ -45,7 +45,7 @@ export interface MistSDK {
         info(): Promise<any>;
     };
     network: {
-        fetch(url: string, options?: { method?: string }): Promise<{ status: number; data: string; ok: boolean }>;
+        fetch(url: string, options?: { method?: string; body?: string }): Promise<{ status: number; data: string; ok: boolean }>;
     };
     clipboard: {
         read(): Promise<{ text: string }>;
@@ -61,7 +61,7 @@ export interface MistSDK {
         openDialer(number: string): Promise<{ opened: boolean }>;
     };
     sms: {
-        openComposer(number: string, body?: string): Promise<{ opened: behavior?: string }>;
+        openComposer(number: string, body?: string): Promise<{ opened: boolean }>;
     };
     notifications: {
         send(title: string, body: string): Promise<{ sent: boolean }>;
@@ -81,6 +81,10 @@ export interface MistSDK {
     };
     nfc: {
         isAvailable(): Promise<{ available: boolean }>;
+    };
+    background: {
+        schedule(taskId: string, delay?: number): Promise<{ taskId: string; scheduled: boolean; delay: number }>;
+        cancel(taskId: string): Promise<{ taskId: string; cancelled: boolean }>;
     };
 }
 

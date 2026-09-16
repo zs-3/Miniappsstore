@@ -5,6 +5,14 @@ import kotlinx.serialization.json.Json
 import java.util.regex.Pattern
 
 @Serializable
+data class BackgroundConfig(
+    val enabled: Boolean = false,
+    val entry: String = "background/background.js",
+    val events: List<String> = emptyList(),
+    val permissions: List<String> = emptyList()
+)
+
+@Serializable
 data class Manifest(
     val id: String,
     val name: String,
@@ -14,6 +22,7 @@ data class Manifest(
     val entry: String = "index.html",
     val icon: String = "icon.png",
     val permissions: List<String> = emptyList(),
+    val background: BackgroundConfig? = null,
     val minMistFoxVersion: String = "1.0.0",
     val category: String? = null
 ) {
@@ -69,6 +78,17 @@ data class Manifest(
         }
         if (icon.contains("..") || icon.startsWith("/") || icon.contains("\\")) {
             throw PackageException.InvalidManifest("Invalid icon path: '$icon'. Path traversal is prohibited.")
+        }
+
+        background?.let { bg ->
+            if (bg.enabled) {
+                if (bg.entry.isBlank()) {
+                    throw PackageException.InvalidManifest("Background entry path cannot be empty when background is enabled.")
+                }
+                if (bg.entry.contains("..") || bg.entry.startsWith("/") || bg.entry.contains("\\")) {
+                    throw PackageException.InvalidManifest("Invalid background entry path: '${bg.entry}'. Path traversal is prohibited.")
+                }
+            }
         }
     }
 }
